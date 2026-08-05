@@ -502,6 +502,11 @@ else:
 MACRO_DIR = os.path.join(_BASE_DIR, "macros")
 
 
+def resource_path(name):
+    """번들 리소스 경로 (PyInstaller onefile은 임시 폴더에 압축 해제됨)"""
+    return os.path.join(getattr(sys, "_MEIPASS", _BASE_DIR), name)
+
+
 class App:
     def __init__(self, root):
         self.root = root
@@ -699,6 +704,10 @@ def main():
             pass
 
     root = tk.Tk()
+    try:
+        root.iconbitmap(resource_path("icon.ico"))
+    except Exception:
+        pass
     App(root)
     root.mainloop()
 
