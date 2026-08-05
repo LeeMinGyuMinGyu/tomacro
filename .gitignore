@@ -1,0 +1,12 @@
+# 빌드 산출물 (배포는 GitHub Release로)
+dist/
+build/
+*.spec
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+
+# 사용자가 녹화한 매크로 (개인 데이터)
+macros/
