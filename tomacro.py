@@ -633,6 +633,9 @@ class App:
             if f.endswith(".json"):
                 self.listbox.insert(tk.END, f[:-5])
 
+    # 주의: macros/*.json 은 사용자의 자산이므로 형식 하위 호환을 반드시 유지할 것.
+    # 필드 변경/삭제 금지, 추가만 허용. 형식 변경 시 version 올리고 마이그레이션 필수.
+    # (자세한 규칙은 README "매크로 파일 하위 호환성" 참고)
     def save_macro(self):
         if not self.events:
             messagebox.showinfo("tomacro", "저장할 녹화가 없습니다. 먼저 F9로 녹화하세요.")
