@@ -507,6 +507,101 @@ def resource_path(name):
     return os.path.join(getattr(sys, "_MEIPASS", _BASE_DIR), name)
 
 
+# ---------------------------------------------------------------- 다국어(i18n)
+
+CONFIG_PATH = os.path.join(_BASE_DIR, "config.json")
+
+STRINGS = {
+    "ko": {
+        "title": "tomacro - 클립스튜디오 매크로",
+        "status_ready": "대기 중",
+        "status_rec": "● 녹화 중... ({n}개)  F9로 중지",
+        "status_play": "▶ 재생 중... ({p})  ESC로 중지",
+        "info": "F9: 녹화 시작/중지    F10: 재생    ESC: 재생 중지\n"
+                "Alt+Tab 창 전환도 자동으로 녹화·재생됩니다",
+        "btn_rec": "● 녹화 (F9)",
+        "btn_play": "▶ 재생 (F10)",
+        "btn_stop": "■ 중지 (ESC)",
+        "opts": "재생 설정",
+        "repeat": "반복 횟수",
+        "gap": "반복 간격(초)",
+        "speed": "재생 속도",
+        "files": "저장된 매크로",
+        "save": "현재 녹화 저장",
+        "load": "불러오기",
+        "delete": "삭제",
+        "cur_none": "현재 매크로: 없음",
+        "cur_named": "현재 매크로: {name} ({n}개 동작)",
+        "new_rec": "새 녹화",
+        "msg_no_macro": "재생할 매크로가 없습니다.\n먼저 녹화하거나 저장된 매크로를 불러오세요.",
+        "msg_bad_values": "반복 횟수/간격/속도 값을 확인하세요.",
+        "msg_nothing_to_save": "저장할 녹화가 없습니다. 먼저 F9로 녹화하세요.",
+        "save_title": "매크로 저장",
+        "save_prompt": "매크로 이름 (예: 메테리얼2개, 기본텍스처):",
+        "msg_select": "목록에서 매크로를 선택하세요.",
+        "msg_load_fail": "불러오기 실패: {err}",
+        "msg_delete_confirm": "'{name}' 매크로를 삭제할까요?",
+        "lang_btn": "English",
+    },
+    "en": {
+        "title": "tomacro - Clip Studio Macro",
+        "status_ready": "Ready",
+        "status_rec": "● Recording... ({n} events)  F9 to stop",
+        "status_play": "▶ Playing... ({p})  ESC to stop",
+        "info": "F9: start/stop recording    F10: play    ESC: stop\n"
+                "Alt+Tab window switches are recorded and replayed too",
+        "btn_rec": "● Record (F9)",
+        "btn_play": "▶ Play (F10)",
+        "btn_stop": "■ Stop (ESC)",
+        "opts": "Playback Settings",
+        "repeat": "Repeat count",
+        "gap": "Gap (sec)",
+        "speed": "Speed",
+        "files": "Saved Macros",
+        "save": "Save Recording",
+        "load": "Load",
+        "delete": "Delete",
+        "cur_none": "Current macro: none",
+        "cur_named": "Current macro: {name} ({n} actions)",
+        "new_rec": "new recording",
+        "msg_no_macro": "No macro to play.\nRecord one first (F9) or load a saved macro.",
+        "msg_bad_values": "Check the repeat / gap / speed values.",
+        "msg_nothing_to_save": "Nothing to save. Record with F9 first.",
+        "save_title": "Save Macro",
+        "save_prompt": "Macro name (e.g. two_materials, base_texture):",
+        "msg_select": "Select a macro from the list.",
+        "msg_load_fail": "Failed to load: {err}",
+        "msg_delete_confirm": "Delete macro '{name}'?",
+        "lang_btn": "한국어",
+    },
+}
+
+
+def detect_lang():
+    """Windows 표시 언어가 한국어면 ko, 아니면 en"""
+    try:
+        lang_id = kernel32.GetUserDefaultUILanguage() & 0xFF
+        return "ko" if lang_id == 0x12 else "en"
+    except Exception:
+        return "en"
+
+
+def load_config():
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_config(cfg):
+    try:
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False)
+    except Exception:
+        pass
+
+
 class App:
     def __init__(self, root):
         self.root = root
@@ -516,56 +611,70 @@ class App:
 
         os.makedirs(MACRO_DIR, exist_ok=True)
 
-        root.title("tomacro - 클립스튜디오 매크로")
+        self.config = load_config()
+        self.lang = self.config.get("lang") or detect_lang()
+        if self.lang not in STRINGS:
+            self.lang = "en"
+        # 현재 로드된 매크로 표시용 상태 (언어 전환 시 다시 그리기 위해 보관)
+        self.cur_name = None
+        self.cur_count = 0
+
         root.geometry("360x520")
         root.attributes("-topmost", True)
         root.resizable(False, False)
 
-        self.status_var = tk.StringVar(value="대기 중")
+        header = tk.Frame(root)
+        header.pack(fill="x")
+        self.btn_lang = tk.Button(
+            header, font=("맑은 고딕", 8), relief="groove", command=self.toggle_lang
+        )
+        self.btn_lang.pack(side="right", padx=6, pady=4)
+
+        self.status_var = tk.StringVar()
         status = tk.Label(
-            root, textvariable=self.status_var, font=("맑은 고딕", 14, "bold"),
+            header, textvariable=self.status_var, font=("맑은 고딕", 14, "bold"),
             fg="#333", pady=8,
         )
         status.pack(fill="x")
         self.status_label = status
 
-        info = tk.Label(
-            root,
-            text="F9: 녹화 시작/중지    F10: 재생    ESC: 재생 중지\n"
-            "Alt+Tab 창 전환도 자동으로 녹화·재생됩니다",
-            font=("맑은 고딕", 9), fg="#666",
-        )
-        info.pack()
+        self.info_label = tk.Label(root, font=("맑은 고딕", 9), fg="#666")
+        self.info_label.pack()
 
         btns = tk.Frame(root, pady=6)
         btns.pack()
-        self.btn_rec = tk.Button(btns, text="● 녹화 (F9)", width=12, command=self.toggle_record)
-        self.btn_play = tk.Button(btns, text="▶ 재생 (F10)", width=12, command=self.play)
-        self.btn_stop = tk.Button(btns, text="■ 중지 (ESC)", width=12, command=self.stop_play)
+        self.btn_rec = tk.Button(btns, width=13, command=self.toggle_record)
+        self.btn_play = tk.Button(btns, width=13, command=self.play)
+        self.btn_stop = tk.Button(btns, width=13, command=self.stop_play)
         self.btn_rec.grid(row=0, column=0, padx=3)
         self.btn_play.grid(row=0, column=1, padx=3)
         self.btn_stop.grid(row=0, column=2, padx=3)
 
-        opts = tk.LabelFrame(root, text="재생 설정", font=("맑은 고딕", 9), padx=8, pady=6)
+        opts = tk.LabelFrame(root, font=("맑은 고딕", 9), padx=8, pady=6)
         opts.pack(fill="x", padx=10, pady=6)
+        self.opts_frame = opts
 
-        tk.Label(opts, text="반복 횟수", font=("맑은 고딕", 9)).grid(row=0, column=0, sticky="w")
+        self.lbl_repeat = tk.Label(opts, font=("맑은 고딕", 9))
+        self.lbl_repeat.grid(row=0, column=0, sticky="w")
         self.repeat_var = tk.IntVar(value=1)
         tk.Spinbox(opts, from_=1, to=999, width=6, textvariable=self.repeat_var).grid(row=0, column=1, padx=6)
 
-        tk.Label(opts, text="반복 간격(초)", font=("맑은 고딕", 9)).grid(row=0, column=2, sticky="w")
+        self.lbl_gap = tk.Label(opts, font=("맑은 고딕", 9))
+        self.lbl_gap.grid(row=0, column=2, sticky="w")
         self.gap_var = tk.DoubleVar(value=1.0)
         tk.Spinbox(opts, from_=0, to=60, increment=0.5, width=6, textvariable=self.gap_var).grid(row=0, column=3, padx=6)
 
-        tk.Label(opts, text="재생 속도", font=("맑은 고딕", 9)).grid(row=1, column=0, sticky="w", pady=(6, 0))
+        self.lbl_speed = tk.Label(opts, font=("맑은 고딕", 9))
+        self.lbl_speed.grid(row=1, column=0, sticky="w", pady=(6, 0))
         self.speed_var = tk.StringVar(value="1.0")
         ttk.Combobox(
             opts, textvariable=self.speed_var, width=5, state="readonly",
             values=("0.5", "0.8", "1.0", "1.5", "2.0", "3.0"),
         ).grid(row=1, column=1, padx=6, pady=(6, 0))
 
-        files = tk.LabelFrame(root, text="저장된 매크로", font=("맑은 고딕", 9), padx=8, pady=6)
+        files = tk.LabelFrame(root, font=("맑은 고딕", 9), padx=8, pady=6)
         files.pack(fill="both", expand=True, padx=10, pady=6)
+        self.files_frame = files
 
         self.listbox = tk.Listbox(files, font=("맑은 고딕", 10), height=8)
         self.listbox.pack(fill="both", expand=True)
@@ -573,13 +682,17 @@ class App:
 
         fb = tk.Frame(files, pady=4)
         fb.pack()
-        tk.Button(fb, text="현재 녹화 저장", command=self.save_macro).grid(row=0, column=0, padx=3)
-        tk.Button(fb, text="불러오기", command=self.load_selected).grid(row=0, column=1, padx=3)
-        tk.Button(fb, text="삭제", command=self.delete_selected).grid(row=0, column=2, padx=3)
+        self.btn_save = tk.Button(fb, command=self.save_macro)
+        self.btn_load = tk.Button(fb, command=self.load_selected)
+        self.btn_del = tk.Button(fb, command=self.delete_selected)
+        self.btn_save.grid(row=0, column=0, padx=3)
+        self.btn_load.grid(row=0, column=1, padx=3)
+        self.btn_del.grid(row=0, column=2, padx=3)
 
-        self.count_var = tk.StringVar(value="현재 매크로: 없음")
+        self.count_var = tk.StringVar()
         tk.Label(root, textvariable=self.count_var, font=("맑은 고딕", 9), fg="#666").pack(pady=(0, 6))
 
+        self._apply_texts()
         self.refresh_list()
 
         # 전역 단축키 (녹화용 리스너와 별개로 항상 동작)
@@ -587,6 +700,45 @@ class App:
         self.hotkeys.start()
 
         self._tick()
+
+    # --- 다국어 ---
+    def t(self, key, **fmt):
+        s = STRINGS[self.lang].get(key, key)
+        return s.format(**fmt) if fmt else s
+
+    def toggle_lang(self):
+        self.lang = "en" if self.lang == "ko" else "ko"
+        self.config["lang"] = self.lang
+        save_config(self.config)
+        self._apply_texts()
+
+    def _apply_texts(self):
+        self.root.title(self.t("title"))
+        self.btn_lang.config(text=self.t("lang_btn"))
+        self.info_label.config(text=self.t("info"))
+        self.btn_rec.config(text=self.t("btn_rec"))
+        self.btn_play.config(text=self.t("btn_play"))
+        self.btn_stop.config(text=self.t("btn_stop"))
+        self.opts_frame.config(text=self.t("opts"))
+        self.lbl_repeat.config(text=self.t("repeat"))
+        self.lbl_gap.config(text=self.t("gap"))
+        self.lbl_speed.config(text=self.t("speed"))
+        self.files_frame.config(text=self.t("files"))
+        self.btn_save.config(text=self.t("save"))
+        self.btn_load.config(text=self.t("load"))
+        self.btn_del.config(text=self.t("delete"))
+        self._update_count_label()
+
+    def _set_current(self, name, count):
+        self.cur_name = name
+        self.cur_count = count
+        self._update_count_label()
+
+    def _update_count_label(self):
+        if self.cur_name is None:
+            self.count_var.set(self.t("cur_none"))
+        else:
+            self.count_var.set(self.t("cur_named", name=self.cur_name, n=self.cur_count))
 
     # --- 단축키 ---
     def _on_hotkey(self, key):
@@ -605,21 +757,21 @@ class App:
             self.recorder.start()
         else:
             self.events = self.recorder.stop()
-            self.count_var.set(f"현재 매크로: 새 녹화 ({len(self.events)}개 동작)")
+            self._set_current(self.t("new_rec"), len(self.events))
 
     # --- 재생 ---
     def play(self):
         if self.recorder.recording or self.player.playing:
             return
         if not self.events:
-            messagebox.showinfo("tomacro", "재생할 매크로가 없습니다.\n먼저 녹화하거나 저장된 매크로를 불러오세요.")
+            messagebox.showinfo("tomacro", self.t("msg_no_macro"))
             return
         try:
             repeat = max(1, int(self.repeat_var.get()))
             gap = max(0.0, float(self.gap_var.get()))
             speed = float(self.speed_var.get())
         except (tk.TclError, ValueError):
-            messagebox.showwarning("tomacro", "반복 횟수/간격/속도 값을 확인하세요.")
+            messagebox.showwarning("tomacro", self.t("msg_bad_values"))
             return
         self.player.play(self.events, repeat=repeat, speed=speed, gap=gap)
 
@@ -638,10 +790,10 @@ class App:
     # (자세한 규칙은 README "매크로 파일 하위 호환성" 참고)
     def save_macro(self):
         if not self.events:
-            messagebox.showinfo("tomacro", "저장할 녹화가 없습니다. 먼저 F9로 녹화하세요.")
+            messagebox.showinfo("tomacro", self.t("msg_nothing_to_save"))
             return
         name = simpledialog.askstring(
-            "매크로 저장", "매크로 이름 (예: 메테리얼2개, 기본텍스처):", parent=self.root
+            self.t("save_title"), self.t("save_prompt"), parent=self.root
         )
         if not name:
             return
@@ -652,12 +804,12 @@ class App:
         with open(path, "w", encoding="utf-8") as f:
             json.dump({"version": 1, "events": self.events}, f, ensure_ascii=False)
         self.refresh_list()
-        self.count_var.set(f"현재 매크로: {name} ({len(self.events)}개 동작)")
+        self._set_current(name, len(self.events))
 
     def _selected_name(self):
         sel = self.listbox.curselection()
         if not sel:
-            messagebox.showinfo("tomacro", "목록에서 매크로를 선택하세요.")
+            messagebox.showinfo("tomacro", self.t("msg_select"))
             return None
         return self.listbox.get(sel[0])
 
@@ -670,28 +822,28 @@ class App:
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
             self.events = data["events"]
-            self.count_var.set(f"현재 매크로: {name} ({len(self.events)}개 동작)")
+            self._set_current(name, len(self.events))
         except Exception as e:
-            messagebox.showerror("tomacro", f"불러오기 실패: {e}")
+            messagebox.showerror("tomacro", self.t("msg_load_fail", err=e))
 
     def delete_selected(self):
         name = self._selected_name()
         if not name:
             return
-        if messagebox.askyesno("tomacro", f"'{name}' 매크로를 삭제할까요?"):
+        if messagebox.askyesno("tomacro", self.t("msg_delete_confirm", name=name)):
             os.remove(os.path.join(MACRO_DIR, name + ".json"))
             self.refresh_list()
 
     # --- 상태 표시 갱신 ---
     def _tick(self):
         if self.recorder.recording:
-            self.status_var.set(f"● 녹화 중... ({len(self.recorder.events)}개)  F9로 중지")
+            self.status_var.set(self.t("status_rec", n=len(self.recorder.events)))
             self.status_label.config(fg="#c0392b")
         elif self.player.playing:
-            self.status_var.set(f"▶ 재생 중... ({self.player.progress})  ESC로 중지")
+            self.status_var.set(self.t("status_play", p=self.player.progress))
             self.status_label.config(fg="#27ae60")
         else:
-            self.status_var.set("대기 중")
+            self.status_var.set(self.t("status_ready"))
             self.status_label.config(fg="#333")
         self.root.after(100, self._tick)
 
