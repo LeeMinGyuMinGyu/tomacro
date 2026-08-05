@@ -2,6 +2,11 @@
 
 [한국어](README.md) | **English**
 
+> ### 📥 Download the Program
+> **[Get `tomacro_deploy.zip` from Releases](../../releases/latest)** — unzip and run `tomacro.exe`, no installation needed.
+>
+> ⚠️ The green [Code] button's "Download ZIP" contains **source code for developers** and will not run without Python installed.
+
 A macro program that automates the repetitive task of pasting textures edited in
 Clip Studio Paint into the Material tab of Clip Studio Modeler.
 
