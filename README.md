@@ -51,3 +51,8 @@
 
 - Windows 10/11
 - Python 3.x + `pynput` (`pip install pynput`)
+  (배포판 `tomacro.exe`는 설치 없이 실행 가능)
+
+## 만든 사람들
+
+- **틈메이러** — 의견과 지시사항, 프로그램 아이콘을 제작해주셨습니다. 감사합니다!
