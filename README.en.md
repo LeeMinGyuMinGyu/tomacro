@@ -46,9 +46,9 @@ then double-click the matching macro in the list to load it and press F10 to pla
 
 ## Language
 
-Use the button in the top-right corner of the window to switch between Korean and
-English. On first launch the language is selected automatically based on your
-Windows display language.
+Five languages are supported: 한국어 · English · 日本語 · 中文 · Español.
+Pick one from the dropdown in the top-right corner of the window. On first launch
+the language is selected automatically based on your Windows display language.
 
 ## Notes
 

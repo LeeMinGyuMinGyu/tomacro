@@ -541,7 +541,6 @@ STRINGS = {
         "msg_select": "목록에서 매크로를 선택하세요.",
         "msg_load_fail": "불러오기 실패: {err}",
         "msg_delete_confirm": "'{name}' 매크로를 삭제할까요?",
-        "lang_btn": "English",
     },
     "en": {
         "title": "tomacro - Clip Studio Macro",
@@ -572,16 +571,108 @@ STRINGS = {
         "msg_select": "Select a macro from the list.",
         "msg_load_fail": "Failed to load: {err}",
         "msg_delete_confirm": "Delete macro '{name}'?",
-        "lang_btn": "한국어",
+    },
+    "ja": {
+        "title": "tomacro - クリップスタジオ マクロ",
+        "status_ready": "待機中",
+        "status_rec": "● 記録中... ({n}件)  F9で停止",
+        "status_play": "▶ 再生中... ({p})  ESCで停止",
+        "info": "F9: 記録の開始/停止    F10: 再生    ESC: 再生停止\n"
+                "Alt+Tabのウィンドウ切り替えも自動で記録・再生されます",
+        "btn_rec": "● 記録 (F9)",
+        "btn_play": "▶ 再生 (F10)",
+        "btn_stop": "■ 停止 (ESC)",
+        "opts": "再生設定",
+        "repeat": "繰り返し回数",
+        "gap": "間隔(秒)",
+        "speed": "再生速度",
+        "files": "保存済みマクロ",
+        "save": "記録を保存",
+        "load": "読み込み",
+        "delete": "削除",
+        "cur_none": "現在のマクロ: なし",
+        "cur_named": "現在のマクロ: {name} ({n}件の動作)",
+        "new_rec": "新規記録",
+        "msg_no_macro": "再生するマクロがありません。\nまずF9で記録するか、保存済みマクロを読み込んでください。",
+        "msg_bad_values": "繰り返し回数/間隔/速度の値を確認してください。",
+        "msg_nothing_to_save": "保存する記録がありません。まずF9で記録してください。",
+        "save_title": "マクロを保存",
+        "save_prompt": "マクロ名 (例: マテリアル2個):",
+        "msg_select": "リストからマクロを選択してください。",
+        "msg_load_fail": "読み込み失敗: {err}",
+        "msg_delete_confirm": "マクロ「{name}」を削除しますか？",
+    },
+    "zh": {
+        "title": "tomacro - Clip Studio 宏工具",
+        "status_ready": "就绪",
+        "status_rec": "● 录制中... ({n}项)  按F9停止",
+        "status_play": "▶ 播放中... ({p})  按ESC停止",
+        "info": "F9: 开始/停止录制    F10: 播放    ESC: 停止播放\n"
+                "Alt+Tab 窗口切换也会被自动录制并重现",
+        "btn_rec": "● 录制 (F9)",
+        "btn_play": "▶ 播放 (F10)",
+        "btn_stop": "■ 停止 (ESC)",
+        "opts": "播放设置",
+        "repeat": "重复次数",
+        "gap": "间隔(秒)",
+        "speed": "播放速度",
+        "files": "已保存的宏",
+        "save": "保存当前录制",
+        "load": "载入",
+        "delete": "删除",
+        "cur_none": "当前宏: 无",
+        "cur_named": "当前宏: {name} ({n}个动作)",
+        "new_rec": "新录制",
+        "msg_no_macro": "没有可播放的宏。\n请先按F9录制，或载入已保存的宏。",
+        "msg_bad_values": "请检查重复次数/间隔/速度的值。",
+        "msg_nothing_to_save": "没有可保存的录制。请先按F9录制。",
+        "save_title": "保存宏",
+        "save_prompt": "宏名称 (例: 材质2个):",
+        "msg_select": "请在列表中选择一个宏。",
+        "msg_load_fail": "载入失败: {err}",
+        "msg_delete_confirm": "确定删除宏“{name}”吗？",
+    },
+    "es": {
+        "title": "tomacro - Macro para Clip Studio",
+        "status_ready": "En espera",
+        "status_rec": "● Grabando... ({n})  F9 para detener",
+        "status_play": "▶ Reproduciendo... ({p})  ESC para detener",
+        "info": "F9: iniciar/detener grabación    F10: reproducir    ESC: detener\n"
+                "Los cambios de ventana con Alt+Tab también se graban y reproducen",
+        "btn_rec": "● Grabar (F9)",
+        "btn_play": "▶ Reproducir (F10)",
+        "btn_stop": "■ Detener (ESC)",
+        "opts": "Ajustes de reproducción",
+        "repeat": "Repeticiones",
+        "gap": "Intervalo (s)",
+        "speed": "Velocidad",
+        "files": "Macros guardadas",
+        "save": "Guardar grabación",
+        "load": "Cargar",
+        "delete": "Eliminar",
+        "cur_none": "Macro actual: ninguna",
+        "cur_named": "Macro actual: {name} ({n} acciones)",
+        "new_rec": "nueva grabación",
+        "msg_no_macro": "No hay macro para reproducir.\nGraba una con F9 o carga una macro guardada.",
+        "msg_bad_values": "Revisa los valores de repeticiones/intervalo/velocidad.",
+        "msg_nothing_to_save": "No hay nada que guardar. Graba primero con F9.",
+        "save_title": "Guardar macro",
+        "save_prompt": "Nombre de la macro (ej. dos_materiales):",
+        "msg_select": "Selecciona una macro de la lista.",
+        "msg_load_fail": "Error al cargar: {err}",
+        "msg_delete_confirm": "¿Eliminar la macro '{name}'?",
     },
 }
 
+LANGS = ["ko", "en", "ja", "zh", "es"]
+LANG_NAMES = {"ko": "한국어", "en": "English", "ja": "日本語", "zh": "中文", "es": "Español"}
+
 
 def detect_lang():
-    """Windows 표시 언어가 한국어면 ko, 아니면 en"""
+    """Windows 표시 언어에 맞는 지원 언어 코드 (미지원 언어는 en)"""
     try:
-        lang_id = kernel32.GetUserDefaultUILanguage() & 0xFF
-        return "ko" if lang_id == 0x12 else "en"
+        primary = kernel32.GetUserDefaultUILanguage() & 0x3FF
+        return {0x12: "ko", 0x11: "ja", 0x04: "zh", 0x0A: "es"}.get(primary, "en")
     except Exception:
         return "en"
 
@@ -619,16 +710,19 @@ class App:
         self.cur_name = None
         self.cur_count = 0
 
-        root.geometry("360x520")
+        root.geometry("380x520")
         root.attributes("-topmost", True)
         root.resizable(False, False)
 
         header = tk.Frame(root)
         header.pack(fill="x")
-        self.btn_lang = tk.Button(
-            header, font=("맑은 고딕", 8), relief="groove", command=self.toggle_lang
+        self.lang_var = tk.StringVar()
+        self.lang_box = ttk.Combobox(
+            header, textvariable=self.lang_var, width=8, state="readonly",
+            font=("맑은 고딕", 8), values=[LANG_NAMES[l] for l in LANGS],
         )
-        self.btn_lang.pack(side="right", padx=6, pady=4)
+        self.lang_box.bind("<<ComboboxSelected>>", self._on_lang_selected)
+        self.lang_box.pack(side="right", padx=6, pady=4)
 
         self.status_var = tk.StringVar()
         status = tk.Label(
@@ -643,9 +737,9 @@ class App:
 
         btns = tk.Frame(root, pady=6)
         btns.pack()
-        self.btn_rec = tk.Button(btns, width=13, command=self.toggle_record)
-        self.btn_play = tk.Button(btns, width=13, command=self.play)
-        self.btn_stop = tk.Button(btns, width=13, command=self.stop_play)
+        self.btn_rec = tk.Button(btns, command=self.toggle_record)
+        self.btn_play = tk.Button(btns, command=self.play)
+        self.btn_stop = tk.Button(btns, command=self.stop_play)
         self.btn_rec.grid(row=0, column=0, padx=3)
         self.btn_play.grid(row=0, column=1, padx=3)
         self.btn_stop.grid(row=0, column=2, padx=3)
@@ -706,15 +800,20 @@ class App:
         s = STRINGS[self.lang].get(key, key)
         return s.format(**fmt) if fmt else s
 
-    def toggle_lang(self):
-        self.lang = "en" if self.lang == "ko" else "ko"
+    def _on_lang_selected(self, _event=None):
+        name = self.lang_var.get()
+        for code, native in LANG_NAMES.items():
+            if native == name:
+                self.lang = code
+                break
         self.config["lang"] = self.lang
         save_config(self.config)
         self._apply_texts()
+        self.lang_box.selection_clear()
 
     def _apply_texts(self):
         self.root.title(self.t("title"))
-        self.btn_lang.config(text=self.t("lang_btn"))
+        self.lang_var.set(LANG_NAMES[self.lang])
         self.info_label.config(text=self.t("info"))
         self.btn_rec.config(text=self.t("btn_rec"))
         self.btn_play.config(text=self.t("btn_play"))
